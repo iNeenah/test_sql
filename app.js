@@ -1,66 +1,45 @@
-const connection = require('./db_connection.js');
+import info, { suma, resta, multiplicacion, division } from './calculadora.js';
 
 /**
- * Muestra los nombres, apellidos y teléfonos de todos los pacientes.
+ * Recibe el nombre de un cálculo y dos valores, y muestra el resultado en consola.
+ * @param {string} operacion - El nombre del cálculo ('suma', 'resta', 'multiplicacion', 'division').
+ * @param {number} a - El primer valor.
+ * @param {number} b - El segundo valor.
  */
-const getTelefonos = () => {
-  // CORRECCIÓN: De 'pacientes' a 'paciente'
-  const query = 'SELECT nombre, apellido, telefono FROM paciente;';
-  
-  connection.query(query, (error, results) => {
-    if (error) {
-      return console.error('Error al ejecutar la consulta:', error.stack);
+const calcular = (operacion, a, b) => {
+    let resultado;
+    switch (operacion.toLowerCase()) {
+        case 'suma':
+            resultado = suma(a, b);
+            break;
+        case 'resta':
+            resultado = resta(a, b);
+            break;
+        case 'multiplicacion':
+            resultado = multiplicacion(a, b);
+            break;
+        case 'division':
+            resultado = division(a, b);
+            break;
+        default:
+            resultado = "Operación no válida. Use 'suma', 'resta', 'multiplicacion' o 'division'.";
+            break;
     }
-    console.log("\n--- Listado de Teléfonos de Pacientes ---");
-    console.table(results);
-  });
+    console.log(`El resultado de la ${operacion} es: ${resultado}`);
 };
-
-/**
- * Obtiene el teléfono de un paciente por su número de historial.
- * @param {number} nro_historial_clinico
- */
-const getTelefonoPaciente = (nro_historial_clinico) => {
-  // CORRECCIÓN: De 'pacientes' a 'paciente' y la columna a 'nro_historial_clinico'
-  const query = 'SELECT telefono FROM paciente WHERE nro_historial_clinico = ?;';
-  
-  connection.query(query, [nro_historial_clinico], (error, results) => {
-    if (error) {
-      return console.error('Error al ejecutar la consulta:', error.stack);
-    }
-    console.log(`\n--- Teléfono del paciente con historial ${nro_historial_clinico} ---`);
-    console.log(results[0] || 'No se encontró el paciente.');
-  });
-};
-
-/**
- * Obtiene el listado de médicos que atendieron a un paciente específico.
- * @param {number} nro_historial_clinico
- */
-const getMedicosPaciente = (nro_historial_clinico) => {
-  // CORRECCIÓN: Nombres de tablas 'medico' e 'ingreso' y columnas de la relación.
-  const query = `
-    SELECT DISTINCT m.nombre, m.apellido
-    FROM medico m
-    INNER JOIN ingreso i ON m.matricula = i.matricula_medico
-    WHERE i.nro_historial_paciente = ?;
-  `;
-  
-  connection.query(query, [nro_historial_clinico], (error, results) => {
-    if (error) {
-      return console.error('Error al ejecutar la consulta:', error.stack);
-    }
-    console.log(`\n--- Médicos que atendieron al paciente con historial ${nro_historial_clinico} ---`);
-    console.table(results);
-
-    // Cierra la conexión después de la última consulta.
-    connection.end();
-  });
-};
-
 
 // --- Ejecución de las funciones ---
 
-getTelefonos();
-getTelefonoPaciente(1488);
-getMedicosPaciente(4112);
+// Mostramos la información del módulo
+console.log(info());
+console.log("-----------------------------------------");
+
+// Pruebas con cada cálculo disponible
+console.log("--- Realizando pruebas de cálculo ---");
+calcular('suma', 10, 5);
+calcular('resta', 10, 5);
+calcular('multiplicacion', 10, 5);
+calcular('division', 10, 5);
+console.log("\n--- Pruebas con errores ---");
+calcular('division', 10, 0); // Error: división por cero
+calcular('suma', 'diez', 5); // Error: parámetro no numérico
